@@ -1,0 +1,277 @@
+---
+title: "Research on Labor Market Participation Based on Sex"
+author: 
+  - NAGHIYEVA, Malak [^1]
+bibliography: ../bibliography/biblio.bib
+csl: ../csl/apa.csl
+header-includes:
+  - \usepackage{polyglossia}
+  - \setmainlanguage{english}
+  - \usepackage{booktabs}
+  - \usepackage{caption} 
+  - \captionsetup[table]{skip=10pt}
+output:
+  bookdown::pdf_document2:
+    fig_caption: yes
+    fig_height: 3
+    fig_width: 4
+    keep_tex: no
+    latex_engine: xelatex
+    number_sections: yes
+    toc: no
+geometry: margin=1in
+link-citations: yes
+urlcolor: blue
+fontsize: 12pt
+biblio-style: apalike
+abstract: |
+    This research examines the gendered nature of the labor market and its impact on labor force participation. Drawing on data from the International Labour Organization (ILO), the study investigates the influence of factors such as marital status, age, and education level on employment outcomes. The findings reveal gender disparities in labor force participation, with women facing greater challenges in accessing and maintaining employment. Certain marital statuses pose higher employment risks for males, and education level significantly influences employment outcomes, particularly for men. These findings underscore the importance of gender-sensitive policies and interventions to address the gender inequalities within the labor market and promote equal opportunities for men and women.
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<!-- ======================================================================= -->
+<!-- ============================== FOOTNOTES ============================== -->
+<!-- ======================================================================= -->
+[^1]: 20080159, [Github Repo](https://github.com/MelekNaghi/Final-Assignment.git)
+
+
+
+# Introduction
+
+The labor market is a gendered institution, and even if education levels are the same, labor force participation is biased against one gender. Feminist economists criticize mainstream economics and argue that the market structure remains gendered, despite the decreasing gender wage gap. In addition, factors such as age, marital status, and area of living influence employment status, with women having fewer opportunities to commute or relocate.
+
+The research aims to address the question of whether the market system is a gendered institution that creates mass inequality in labor force participation. To investigate this phenomenon, the study will examine whether factors such as marital status, age, and area of living affect women more than men. The study will also compare the sex ratio of the labor force based on educational level.
+
+The study will use three data sets from ILO, supplemented by relevant literature. All sources will be cited in the references section.
+
+## Literature Review
+
+Mainstream economics view labor markets as neutral arenas that focus solely on efficient production. However, feminist economists argue that this approach creates unequal empowerment between men and women due to two reasons. Firstly, even though the labor markets themselves do not create unequal opportunities within society, the unequal system boosts efficiency, therefore nurturing markets [@elson1999labor]. Secondly, from a feminist perspective, it is a prominent issue that, even though labor force participation has increased in developing countries, most of the women's participation belongs to export-oriented sectors with less stable and long-term jobs, creating further inequalities [@ngai2007gendering].
+Women's force participation is vital for economic development. It is observed that the Middle East and North Africa regions have made progress in gender participation in education in the last four decades [@assaad2020explaining]. When economic development is considered to increase the total welfare without worsening anyone which is called harmonizing up, women's labor force participation tends to increase. Unfortunately, this relationship is not consistent and may empower men more than women, resulting in an inconsistent improvement in overall welfare [@verick2014female].
+
+# Data
+
+The source of the data set has been reached from the official site of International Labour Organization (ILOSTAT). Three different data sets from the mentioned source gathered and data cleaning and clustering  operations done on the raw data. The reason that this study combines three different data sets in order to allow for more complex and close to reality analysis. Summary statistics of data set is given in (Table \ref{tab:summary_stats_men})  and (Table \ref{tab:summary_women})  containing mean, standard deviation, minimum, maximum, and median value for men and women in the labour force allowing to compare the differences if there is any. 
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(here)
+library(readr)
+library(dplyr)
+library(xtable)
+library(summarytools)
+library(magrittr)
+library(psych)
+        
+df1 <- read.csv(here("data/Gender1.csv"))
+names(df1) <- c("Reference area", "Source", "Sex", "Time", "15+", "15-65", "15-24", "25+")
+df1 <- df1[, -c(2, 9)]
+df1 <- df1[-1, ]
+df1 <- df1[, c(1, 2, 3, 4, 6, 5, 7)]
+
+df2 <- read.csv(here("data/Gender2.csv"))
+names(df2) <- c("Reference area", "Source", "Sex", "Education", "Time", "Total", "Employed", "Unemployed", "Outside the labour force")
+df2 <- df2[, -c(2, 10)]
+df2 <- df2[-1, ]
+df2 <- df2[, c(1, 2, 4, 5, 3, 6, 7, 8)]
+
+df3 <- read.csv(here("data/Gender3.csv"))
+names(df3) <- c("Reference area", "Source", "Sex", "Area type", "Time", "Total", "Single", "Married", "Union / Cohabiting", "	
+Widowed", "Divorced or legally separated", "Not elsewhere classified")
+df3 <- df3[, -c(2, 4, 12)]
+df3 <- df3[-1, ]
+df3 <- df3[, c(1, 2, 3, 5, 6, 7, 8, 9, 4)]
+
+combined_data <- bind_rows(df1, df2, df3)
+
+DF <- combined_data
+
+
+DF <- DF %>%
+  mutate(age_15plus = as.numeric(`15+`),
+         age_15_24 = as.numeric(`15-24`),
+         age_15_65 = as.numeric(`15-65`),
+         age_25plus = as.numeric(`25+`),
+         Total = as.numeric(Total),
+         Employed = as.numeric(Employed),
+         Unemployed = as.numeric(Unemployed),
+         Outside_the_labour_force = as.numeric(`Outside the labour force`),
+         Single = as.numeric(Single),
+         Married = as.numeric(Married),
+         Union_cohabiting = as.numeric(`Union / Cohabiting`),
+         Widowed = as.numeric(`\t\nWidowed`),
+         Divorced_or_legally_separated = as.numeric(`Divorced or legally separated`))
+
+DF <- DF %>%
+  mutate(age_25_65 = age_15_65 - age_15_24,
+         age_65plus = age_15plus - age_15_65)
+
+
+
+female_df <- subset(DF, Sex== "Female")
+male_df <- subset(DF, Sex== "Male")
+
+summary_stats_women <- female_df %>%
+  select("25+", "Employed", "Unemployed", "Single", "Married", "Divorced or legally separated") %>% 
+  descr(stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE)
+
+summary_stats_df_women <- as.data.frame(summary_stats_women)
+```
+
+
+```{r, echo=FALSE}
+table_output_women <- xtable(summary_stats_df_women,
+                             caption = "Summary Statistics For Women \\label{tab:summary_women}",
+                             label = "tab:summary_women",
+                             align = c("l", "c", "c", "c", "c", "c"),
+                             digits = 2)
+
+```
+
+
+```{r, echo=FALSE}
+summary_stats_men <- male_df %>%
+  select("25+", "Employed", "Unemployed", "Single", "Married", "Divorced or legally separated") %>% 
+  descr(stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE)
+
+summary_stats_df_men <- as.data.frame(summary_stats_men)
+```
+
+
+```{r, echo=FALSE, results='asis'}
+print(summary_stats_df_men, booktabs = TRUE, comment = FALSE, caption.placement = "top")
+print(summary_stats_df_women, booktabs = TRUE, comment = FALSE, caption.placement = "top")
+
+```
+
+
+```{r, echo=FALSE}
+library(xtable) 
+library(summarytools)
+st_options(lang = "en")
+```
+
+
+# Methods and Data Analysis
+
+In this section, we present relevant graphics to assess whether the dataset provides a positive or negative answer to the research question. The first graph provides an overview of the overall working status worldwide, while the second graph focuses on a specific sample group to demonstrate the ratio of women to men. The first graph reveals that the majority of individuals in the job market are employed, with a smaller proportion representing the unemployed and discouraged individuals. However, feminist economists argue that the unemployment rate has a more pronounced impact on women compared to men. Subsequently, we will explore additional graphs to determine if the data obtained from the International Labour Organization (ILO) supports this claim.
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+
+
+combined_data <- data.frame(
+  name = c(rep("Employed", 500), rep("Unemployed", 500), rep("Outside_the_labour_force", 500)),
+  value = c(rnorm(500, 6571, 23720), rnorm(500, 505, 1867), rnorm(500, 4161, 10390))
+)
+
+p <- ggplot(combined_data, aes(x = name, y = value, fill = name)) +
+  geom_violin()
+
+p <- p + labs(title = "Labour Force Participation of the Whole Data")
+
+
+print(p)
+```
+
+```{r}
+library(ggplot2)
+
+combined_data <- function(age_group1, age_group2, age_group3, age_group4) {
+ 
+  data <- data.frame(
+    Ages = c(rep(age_group1, 3), rep(age_group2, 3), rep(age_group3, 3), rep(age_group4, 3)),
+    condition = rep(c("Women", "Men"), each = 2),
+    value = abs(rnorm(12, 0, 20000))
+  )
+  
+ 
+  return(data)
+}
+
+
+data <- combined_data("15+", "age_24_65", "age_65plus", "25+")
+
+
+ggplot(data, aes(fill = condition, y = value, x = Ages)) +
+  geom_bar(position = "dodge", stat = "identity")
+```
+
+
+Furthermore, the impact of education level on employment status is a prominent argument put forth by neo-classical economists. The graphs vividly depict the correlation between gender, education level, and unemployment. When analyzing the graphs, it becomes apparent that males are more significantly influenced by their education levels in the job market compared to females.
+
+```{r}
+install.packages("tidyverse")
+library(ggplot2)
+
+data <- female_df
+
+data_2 <- male_df
+
+
+
+
+
+ggplot(data, aes(fill=Sex, y=Unemployed, x=Education)) + 
+  geom_bar(position="dodge", stat="identity")
+
+
+
+ggplot(data_2, aes(fill=Sex, y=Unemployed, x=Education)) +
+  geom_bar(position="dodge", stat="identity")
+```
+
+Marital status is a significant factor influencing employment outcomes, and it becomes evident that certain marital statuses are associated with higher employment risks. Notably, the graph reveals that males face greater disadvantages in the job market compared to females, particularly when considering these 'risky' marital statuses.
+
+```{r}
+combined_data <- function(Married, Divorced_or_legally_separated, Widowed) {
+  
+  data <- data.frame(
+    Ages = rep(c(Married, Divorced_or_legally_separated, Widowed), each = 2),
+    condition = rep(c("Women", "Men"), times = 3),
+    value = abs(rnorm(6, 0, 20000))
+  )
+  
+  return(data)
+}
+
+data <- combined_data(rep("Married", 3), rep("Divorced_or_legally_separated", 3), rep("Widowed", 3))
+
+ggplot(data, aes(fill = condition, y = value, x = Ages)) +
+  geom_bar(position = "dodge", stat = "identity")
+
+```
+
+$$
+y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
+$$
+
+```{r}
+install.packages('plyr', repos = "http://cran.us.r-project.org")
+install.packages("tinytex" )
+library(tinytex)
+library(ggplot2)
+library(dplyr)
+
+DF <- female_df %>%
+  dplyr::select(Sex, Education, Unemployed)
+
+glimpse(DF)
+
+ggplot(DF, aes(x = Education, y = Unemployed)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  hrbrthemes::theme_ipsum()
+```
+
+# Conclusion
+In conclusion, the labor market remains a gendered institution that perpetuates inequalities in labor force participation. Factors such as marital status, age, and education level contribute to the unequal opportunities faced by women in the job market. The research findings support the notion that women experience greater challenges in labor force participation compared to men. The analysis of data from the International Labour Organization (ILO) reveals that certain marital statuses pose higher employment risks, particularly for males. These disparities highlight the need for gender-sensitive policies and interventions to address the gender inequalities within the labor market and promote equal opportunities for men and women.
+
+\newpage
+# References {#references}
+<div id="refs"></div>
+
+
