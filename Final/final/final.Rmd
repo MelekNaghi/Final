@@ -156,6 +156,7 @@ print(summary_stats_male_df, booktabs = TRUE, comment = FALSE, caption.placement
 print(summary_stats_female_df, booktabs = TRUE, comment = FALSE, caption.placement = "top")
 ```
 
+BU İKİ SUMMARY GRAFİK ÜZERİNE ÇOK ÇALIŞSAM DA DÜZELTEMEDİM...
 
 ```{r, echo=FALSE, results='asis'}
 ```
@@ -262,7 +263,23 @@ ggplot(data, aes(fill = condition, y = value, x = Ages)) +
 $$
 y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
 $$
+install.packages('plyr', repos = "http://cran.us.r-project.org")
+install.packages("tinytex" )
+library(tinytex)
+library(ggplot2)
+library(dplyr)
 
+DF <- female_df %>%
+  dplyr::select(Sex, Education, Unemployed)
+
+glimpse(DF)
+
+ggplot(DF, aes(x = Education, y = Unemployed)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  hrbrthemes::theme_ipsum()
+  
+  KODLARI NE YAPARSAM YAPAYIM KNITR YAPAMADIM.
 
 # Conclusion
 In conclusion, the labor market remains a gendered institution that perpetuates inequalities in labor force participation. Factors such as marital status, age, and education level contribute to the unequal opportunities faced by women in the job market. The research findings support the notion that women experience greater challenges in labor force participation compared to men. The analysis of data from the International Labour Organization (ILO) reveals that certain marital statuses pose higher employment risks, particularly for males. These disparities highlight the need for gender-sensitive policies and interventions to address the gender inequalities within the labor market and promote equal opportunities for men and women.
