@@ -34,7 +34,7 @@ knitr::opts_chunk$set(cache = FALSE, echo = TRUE, message = FALSE, warning = FAL
 <!-- ======================================================================= -->
 <!-- ============================== FOOTNOTES ============================== -->
 <!-- ======================================================================= -->
-[^1]: 20080159, [Github Repo](https://github.com/MelekNaghi/Final-Assignment.git)
+[^1]: 20080159, [Github Repo](https://github.com/MelekNaghi/Final.git)
 
 
 
@@ -53,7 +53,7 @@ Women's force participation is vital for economic development. It is observed th
 
 # Data
 
-The source of the data set has been reached from the official site of International Labour Organization (ILOSTAT). Three different data sets from the mentioned source gathered and data cleaning and clustering  operations done on the raw data. The reason that this study combines three different data sets in order to allow for more complex and close to reality analysis. Summary statistics of data set is given in (Table \ref{tab:summary_stats_men})  and (Table \ref{tab:summary_women})  containing mean, standard deviation, minimum, maximum, and median value for men and women in the labour force allowing to compare the differences if there is any. 
+The source of the data set has been reached from the official site of International Labour Organization (ILOSTAT). Three different data sets from the mentioned source gathered and data cleaning and clustering  operations done on the raw data. The reason that this study combines three different data sets in order to allow for more complex and close to reality analysis. Summary statistics of data set is given in Table 1  and Table 2  containing mean, standard deviation, minimum, maximum, and median value for men and women in the labour force allowing to compare the differences if there is any. 
 
 ```{r, echo=FALSE}
 library(tidyverse)
@@ -112,38 +112,52 @@ DF <- DF %>%
 
 female_df <- subset(DF, Sex== "Female")
 male_df <- subset(DF, Sex== "Male")
-
-summary_stats_women <- female_df %>%
-  select("25+", "Employed", "Unemployed", "Single", "Married", "Divorced or legally separated") %>% 
-  descr(stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE)
-
-summary_stats_df_women <- as.data.frame(summary_stats_women)
 ```
 
 
-```{r, echo=FALSE}
-table_output_women <- xtable(summary_stats_df_women,
-                             caption = "Summary Statistics For Women \\label{tab:summary_women}",
+```{r, echo=FALSE, fig.align='center'}
+summary_stats_female_df <- female_df %>%
+  select("Employed", "Unemployed", "Single", "Married") %>% 
+  descr(stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE)
+
+summary_stats_female_df <- as.data.frame(summary_stats_female_df)
+
+table_output_female_df <- xtable(summary_stats_female_df,
+                             caption = "Summary Statistics For Women \\label{tab:summary_men}",
                              label = "tab:summary_women",
                              align = c("l", "c", "c", "c", "c", "c"),
                              digits = 2)
-
 ```
 
 
-```{r, echo=FALSE}
-summary_stats_men <- male_df %>%
-  select("25+", "Employed", "Unemployed", "Single", "Married", "Divorced or legally separated") %>% 
+
+
+```{r, echo=FALSE, fig.align='center'}
+summary_stats_male_df <- male_df %>%
+  select("Employed", "Unemployed", "Single", "Married") %>% 
   descr(stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE)
 
-summary_stats_df_men <- as.data.frame(summary_stats_men)
+summary_stats_male_df <- as.data.frame(summary_stats_male_df)
+
+table_output_male_df <- xtable(summary_stats_male_df,
+                             caption = "Summary Statistics For Men \\label{tab:summary_men}",
+                             label = "tab:summary_men",
+                             align = c("l", "c", "c", "c", "c", "c"),
+                             digits = 2)
 ```
 
 
 ```{r, echo=FALSE, results='asis'}
-print(summary_stats_df_men, booktabs = TRUE, comment = FALSE, caption.placement = "top")
-print(summary_stats_df_women, booktabs = TRUE, comment = FALSE, caption.placement = "top")
+print(summary_stats_male_df, booktabs = TRUE, comment = FALSE, caption.placement = "top")
+```
 
+
+```{r, echo=FALSE, results='asis'}
+print(summary_stats_female_df, booktabs = TRUE, comment = FALSE, caption.placement = "top")
+```
+
+
+```{r, echo=FALSE, results='asis'}
 ```
 
 
@@ -158,7 +172,7 @@ st_options(lang = "en")
 
 In this section, we present relevant graphics to assess whether the dataset provides a positive or negative answer to the research question. The first graph provides an overview of the overall working status worldwide, while the second graph focuses on a specific sample group to demonstrate the ratio of women to men. The first graph reveals that the majority of individuals in the job market are employed, with a smaller proportion representing the unemployed and discouraged individuals. However, feminist economists argue that the unemployment rate has a more pronounced impact on women compared to men. Subsequently, we will explore additional graphs to determine if the data obtained from the International Labour Organization (ILO) supports this claim.
 
-```{r}
+```{r, echo=FALSE, fig.align='center'}
 install.packages("ggplot2")
 library(ggplot2)
 
@@ -177,7 +191,7 @@ p <- p + labs(title = "Labour Force Participation of the Whole Data")
 print(p)
 ```
 
-```{r}
+```{r, echo=FALSE, fig.align='center'}
 library(ggplot2)
 
 combined_data <- function(age_group1, age_group2, age_group3, age_group4) {
@@ -203,7 +217,7 @@ ggplot(data, aes(fill = condition, y = value, x = Ages)) +
 
 Furthermore, the impact of education level on employment status is a prominent argument put forth by neo-classical economists. The graphs vividly depict the correlation between gender, education level, and unemployment. When analyzing the graphs, it becomes apparent that males are more significantly influenced by their education levels in the job market compared to females.
 
-```{r}
+```{r, echo=FALSE, fig.align='center'}
 install.packages("tidyverse")
 library(ggplot2)
 
@@ -226,7 +240,7 @@ ggplot(data_2, aes(fill=Sex, y=Unemployed, x=Education)) +
 
 Marital status is a significant factor influencing employment outcomes, and it becomes evident that certain marital statuses are associated with higher employment risks. Notably, the graph reveals that males face greater disadvantages in the job market compared to females, particularly when considering these 'risky' marital statuses.
 
-```{r}
+```{r, echo=FALSE, fig.align='center'}
 combined_data <- function(Married, Divorced_or_legally_separated, Widowed) {
   
   data <- data.frame(
@@ -249,23 +263,6 @@ $$
 y_i = \beta_0 + \beta_1 x_i + \varepsilon_i
 $$
 
-```{r}
-install.packages('plyr', repos = "http://cran.us.r-project.org")
-install.packages("tinytex" )
-library(tinytex)
-library(ggplot2)
-library(dplyr)
-
-DF <- female_df %>%
-  dplyr::select(Sex, Education, Unemployed)
-
-glimpse(DF)
-
-ggplot(DF, aes(x = Education, y = Unemployed)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  hrbrthemes::theme_ipsum()
-```
 
 # Conclusion
 In conclusion, the labor market remains a gendered institution that perpetuates inequalities in labor force participation. Factors such as marital status, age, and education level contribute to the unequal opportunities faced by women in the job market. The research findings support the notion that women experience greater challenges in labor force participation compared to men. The analysis of data from the International Labour Organization (ILO) reveals that certain marital statuses pose higher employment risks, particularly for males. These disparities highlight the need for gender-sensitive policies and interventions to address the gender inequalities within the labor market and promote equal opportunities for men and women.
